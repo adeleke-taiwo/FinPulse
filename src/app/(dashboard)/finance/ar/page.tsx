@@ -1,0 +1,251 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { AgingChart } from "@/components/finance/aging-chart";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency, toTitleCase } from "@/lib/utils";
+import { format } from "date-fns";
+import {
+  DollarSign,
+  AlertTriangle,
+  Clock,
+  ArrowRight,
+  Users,
+  FileText,
+} from "lucide-react";
+import Link from "next/link";
+import type { AgingReport } from "@/lib/finance/aging";
+
+interface ARDashboardData {
+  kpis: {
+    totalReceivables: number;
+    overdueAmount: number;
+    averageCollectionDays: number;
+    customerCount: number;
+  };
+  aging: AgingReport;
+  recentInvoices: {
+    id: string;
+    invoiceNumber: string;
+    customerName: string;
+    amount: number;
+    dueDate: string;
+    status: string;
+  }[];
+}
+
+const invoiceStatusColors: Record<string, string> = {
+  SENT: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
+  PAID: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  OVERDUE: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400",
+  DRAFT: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300",
+  PARTIALLY_PAID: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400",
+};
+
+export default function ARDashboardPage() {
+  const [data, setData] = useState<ARDashboardData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadData() {
+      try {
+        const res = await fetch("/api/finance/aging?type=ar");
+        if (res.ok) {
+          const json = await res.json();
+          const aging: AgingReport = json.data || json;
+          const overdueAmount =
+            aging.thirtyDays.totalAmount +
+            aging.sixtyDays.totalAmount +
+            aging.ninetyDays.totalAmount +
+            aging.overNinety.totalAmount;
+          const allInvoices = [
+            ...aging.current.invoices,
+            ...aging.thirtyDays.invoices,
+            ...aging.sixtyDays.invoices,
+            ...aging.ninetyDays.invoices,
+            ...aging.overNinety.invoices,
+          ];
+          setData({
+            kpis: {
+              totalReceivables: aging.totalOutstanding,
+              overdueAmount,
+              averageCollectionDays: 0,
+              customerCount: new Set(allInvoices.map((i) => i.vendorOrCustomer)).size,
+            },
+            aging,
+            recentInvoices: allInvoices.slice(0, 10).map((inv) => ({
+              id: inv.id,
+              invoiceNumber: inv.invoiceNumber,
+              customerName: inv.vendorOrCustomer,
+              amount: inv.amount,
+              dueDate: inv.dueDate,
+              status: inv.daysOverdue > 0 ? "OVERDUE" : "SENT",
+            })),
+          });
+        }
+      } catch {
+        // silently fail
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  if (loading || !data) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold">Accounts Receivable</h1>
+            <p className="text-sm text-muted-foreground">Manage customer invoices and collections</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Skeleton key={i} className="h-[100px] rounded-lg" />
+          ))}
+        </div>
+        <Skeleton className="h-[350px] rounded-lg" />
+      </div>
+    );
+  }
+
+  const kpiCards = [
+    {
+      title: "Total Receivables",
+      value: formatCurrency(data.kpis.totalReceivables),
+      icon: DollarSign,
+      color: "text-blue-600 dark:text-blue-400",
+      bg: "bg-blue-100 dark:bg-blue-900/30",
+    },
+    {
+      title: "Overdue Amount",
+      value: formatCurrency(data.kpis.overdueAmount),
+      icon: AlertTriangle,
+      color: "text-red-600 dark:text-red-400",
+      bg: "bg-red-100 dark:bg-red-900/30",
+    },
+    {
+      title: "Average Collection Days",
+      value: `${data.kpis.averageCollectionDays} days`,
+      icon: Clock,
+      color: "text-amber-600 dark:text-amber-400",
+      bg: "bg-amber-100 dark:bg-amber-900/30",
+    },
+    {
+      title: "Active Customers",
+      value: data.kpis.customerCount.toLocaleString(),
+      icon: Users,
+      color: "text-purple-600 dark:text-purple-400",
+      bg: "bg-purple-100 dark:bg-purple-900/30",
+    },
+  ];
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Accounts Receivable</h1>
+          <p className="text-sm text-muted-foreground">Manage customer invoices and collections</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" asChild>
+            <Link href="/finance/ar/customers">
+              <Users className="h-3.5 w-3.5" />
+              Customers
+            </Link>
+          </Button>
+          <Button size="sm" asChild>
+            <Link href="/finance/ar/invoices">
+              <FileText className="h-3.5 w-3.5" />
+              Invoices
+            </Link>
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {kpiCards.map((kpi) => (
+          <Card key={kpi.title}>
+            <CardContent className="flex items-center gap-4 py-4">
+              <div className={`flex h-10 w-10 items-center justify-center rounded-lg ${kpi.bg}`}>
+                <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground">{kpi.title}</p>
+                <p className="text-lg font-bold text-foreground">{kpi.value}</p>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      {/* Aging Chart */}
+      <AgingChart report={data.aging} title="AR Aging Report" />
+
+      {/* Recent Invoices */}
+      <div className="rounded-lg border border-border bg-card">
+        <div className="flex items-center justify-between border-b border-border px-4 py-3">
+          <h3 className="font-semibold">Recent Customer Invoices</h3>
+          <Button variant="ghost" size="sm" asChild>
+            <Link href="/finance/ar/invoices">
+              View All
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </Button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="border-b border-border bg-muted/50">
+              <tr>
+                <th className="px-4 py-3 font-medium text-muted-foreground">Invoice #</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">Customer</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">Amount</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">Due Date</th>
+                <th className="px-4 py-3 font-medium text-muted-foreground">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.recentInvoices.map((inv) => (
+                <tr key={inv.id} className="border-b border-border transition-colors hover:bg-muted/30">
+                  <td className="px-4 py-3 font-medium">
+                    <Link href="/finance/ar/invoices" className="text-primary hover:underline">
+                      {inv.invoiceNumber}
+                    </Link>
+                  </td>
+                  <td className="px-4 py-3"><span className="block truncate max-w-[180px]">{inv.customerName}</span></td>
+                  <td className="px-4 py-3 font-mono tabular-nums">
+                    {formatCurrency(inv.amount)}
+                  </td>
+                  <td className="px-4 py-3 text-muted-foreground">
+                    {format(new Date(inv.dueDate), "MMM d, yyyy")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        invoiceStatusColors[inv.status] || "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {toTitleCase(inv.status)}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+              {data.recentInvoices.length === 0 && (
+                <tr>
+                  <td colSpan={5} className="px-4 py-8 text-center text-muted-foreground">
+                    No recent invoices
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
