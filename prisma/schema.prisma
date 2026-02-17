@@ -1,0 +1,811 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Existing Enums ──────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  ANALYST
+  USER
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  INVESTMENT
+  CREDIT
+  LOAN
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  FROZEN
+  CLOSED
+}
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+  TRANSFER
+  FEE
+  INTEREST
+  REFUND
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REVERSED
+}
+
+enum RiskSeverity {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum RiskStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  DISMISSED
+}
+
+enum UploadStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ── New ERP Enums ───────────────────────────────────────────────────────
+
+enum OrgRole {
+  SUPER_ADMIN
+  CFO
+  FINANCE_MANAGER
+  DEPARTMENT_HEAD
+  ANALYST
+  EMPLOYEE
+  AUDITOR
+  EXTERNAL_ACCOUNTANT
+}
+
+enum AccountClassification {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+enum NormalBalance {
+  DEBIT
+  CREDIT
+}
+
+enum JournalStatus {
+  DRAFT
+  PENDING_APPROVAL
+  APPROVED
+  POSTED
+  REVERSED
+}
+
+enum WorkflowType {
+  EXPENSE_APPROVAL
+  BUDGET_REQUEST
+  JOURNAL_APPROVAL
+  VENDOR_ONBOARDING
+  INVOICE_APPROVAL
+}
+
+enum WorkflowStatus {
+  IN_PROGRESS
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum WorkflowStepStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DELEGATED
+}
+
+enum ExpenseStatus {
+  DRAFT
+  SUBMITTED
+  PENDING_APPROVAL
+  APPROVED
+  REJECTED
+  REIMBURSED
+}
+
+enum InvoiceStatus {
+  RECEIVED
+  PENDING_APPROVAL
+  APPROVED
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  DISPUTED
+  VOID
+}
+
+enum CustomerInvoiceStatus {
+  DRAFT
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  VOID
+}
+
+enum BudgetPeriodType {
+  ANNUAL
+  QUARTERLY
+  MONTHLY
+}
+
+enum BudgetStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  ACTIVE
+  CLOSED
+}
+
+// ── Existing Models ─────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  firstName    String
+  lastName     String
+  role         Role      @default(USER)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  accounts    Account[]
+  auditLogs   AuditLog[]
+  dataUploads DataUpload[]
+
+  // ERP relations
+  orgMemberships       OrgMember[]
+  departmentsHeaded    Department[]       @relation("DepartmentHead")
+  journalEntriesCreated JournalEntry[]    @relation("JournalCreator")
+  journalEntriesApproved JournalEntry[]   @relation("JournalApprover")
+  periodsClosedBy      FiscalPeriod[]     @relation("PeriodCloser")
+  expensesSubmitted    Expense[]
+  workflowsSubmitted   WorkflowInstance[] @relation("WorkflowSubmitter")
+  workflowStepActions  WorkflowStepAction[]
+  budgetsCreated       Budget[]
+  reportsCreated       Report[]
+
+  @@map("users")
+}
+
+model Account {
+  id            String        @id @default(uuid())
+  userId        String
+  accountNumber String        @unique
+  type          AccountType
+  balance       Decimal       @db.Decimal(15, 2)
+  currency      String        @default("USD")
+  status        AccountStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  user                User          @relation(fields: [userId], references: [id])
+  outgoingTransactions Transaction[] @relation("FromAccount")
+  incomingTransactions Transaction[] @relation("ToAccount")
+
+  @@index([userId])
+  @@map("accounts")
+}
+
+model Transaction {
+  id            String            @id @default(uuid())
+  fromAccountId String?
+  toAccountId   String?
+  categoryId    String?
+  type          TransactionType
+  status        TransactionStatus @default(COMPLETED)
+  amount        Decimal           @db.Decimal(15, 2)
+  description   String?
+  occurredAt    DateTime          @default(now())
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+
+  fromAccount Account?   @relation("FromAccount", fields: [fromAccountId], references: [id])
+  toAccount   Account?   @relation("ToAccount", fields: [toAccountId], references: [id])
+  category    Category?  @relation(fields: [categoryId], references: [id])
+  riskFlags   RiskFlag[]
+
+  @@index([fromAccountId])
+  @@index([toAccountId])
+  @@index([categoryId])
+  @@index([occurredAt])
+  @@index([type])
+  @@index([status])
+  @@map("transactions")
+}
+
+model Category {
+  id       String  @id @default(uuid())
+  name     String
+  slug     String  @unique
+  parentId String?
+  color    String  @default("#6366f1")
+  icon     String  @default("tag")
+
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+
+  transactions Transaction[]
+
+  @@map("categories")
+}
+
+model RiskFlag {
+  id            String       @id @default(uuid())
+  transactionId String
+  severity      RiskSeverity
+  status        RiskStatus   @default(OPEN)
+  ruleTriggered String
+  riskScore     Decimal      @db.Decimal(5, 2)
+  details       Json?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId])
+  @@index([severity])
+  @@index([status])
+  @@map("risk_flags")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String
+  resource   String
+  resourceId String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model DataUpload {
+  id           String       @id @default(uuid())
+  uploadedById String
+  fileName     String
+  rowCount     Int          @default(0)
+  validRows    Int          @default(0)
+  invalidRows  Int          @default(0)
+  status       UploadStatus @default(PENDING)
+  errors       Json?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  uploadedBy User @relation(fields: [uploadedById], references: [id])
+
+  @@index([uploadedById])
+  @@map("data_uploads")
+}
+
+// ── Phase 1: Multi-Tenancy & Enhanced RBAC ──────────────────────────────
+
+model Organization {
+  id           String   @id @default(uuid())
+  name         String
+  slug         String   @unique
+  logoUrl      String?
+  primaryColor String   @default("#6366f1")
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subsidiaries  Subsidiary[]
+  departments   Department[]
+  members       OrgMember[]
+  customRoles   CustomRole[]
+  glAccounts    GLAccount[]
+  journalEntries JournalEntry[]
+  fiscalPeriods FiscalPeriod[]
+  expenses      Expense[]
+  workflowTemplates WorkflowTemplate[]
+  vendors       Vendor[]
+  invoices      Invoice[]
+  customers     Customer[]
+  customerInvoices CustomerInvoice[]
+  payments      Payment[]
+  budgets       Budget[]
+  reports       Report[]
+
+  @@map("organizations")
+}
+
+model Subsidiary {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  code           String
+  country        String   @default("US")
+  currency       String   @default("USD")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  departments  Department[]
+
+  @@unique([organizationId, code])
+  @@map("subsidiaries")
+}
+
+model Department {
+  id             String   @id @default(uuid())
+  organizationId String
+  subsidiaryId   String?
+  parentId       String?
+  name           String
+  code           String
+  headUserId     String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subsidiary   Subsidiary?  @relation(fields: [subsidiaryId], references: [id], onDelete: SetNull)
+  parent       Department?  @relation("DepartmentHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children     Department[] @relation("DepartmentHierarchy")
+  head         User?        @relation("DepartmentHead", fields: [headUserId], references: [id], onDelete: SetNull)
+
+  costCenters CostCenter[]
+  members     OrgMember[]
+  expenses    Expense[]
+  budgets     Budget[]
+
+  @@unique([organizationId, code])
+  @@map("departments")
+}
+
+model CostCenter {
+  id           String   @id @default(uuid())
+  departmentId String
+  name         String
+  code         String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  department   Department    @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+  journalLines JournalLine[]
+  expenses     Expense[]
+
+  @@unique([departmentId, code])
+  @@map("cost_centers")
+}
+
+model OrgMember {
+  id             String   @id @default(uuid())
+  userId         String
+  organizationId String
+  departmentId   String?
+  role           OrgRole  @default(EMPLOYEE)
+  customRoleId   String?
+  title          String?
+  managerId      String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  department   Department?   @relation(fields: [departmentId], references: [id])
+  customRole   CustomRole?   @relation(fields: [customRoleId], references: [id])
+  manager      OrgMember?    @relation("ReportingLine", fields: [managerId], references: [id], onDelete: SetNull)
+  directReports OrgMember[]  @relation("ReportingLine")
+
+  @@unique([userId, organizationId])
+  @@index([organizationId])
+  @@index([departmentId])
+  @@map("org_members")
+}
+
+model CustomRole {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  permissions    Json     // { "expenses": ["view","create"], "gl": ["view","approve"] }
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  members      OrgMember[]
+
+  @@unique([organizationId, name])
+  @@map("custom_roles")
+}
+
+// ── Phase 2: General Ledger & Chart of Accounts ─────────────────────────
+
+model GLAccount {
+  id             String              @id @default(uuid())
+  organizationId String
+  code           String              // e.g. "1010"
+  name           String
+  classification AccountClassification
+  normalBalance  NormalBalance       @default(DEBIT)
+  parentId       String?
+  description    String?
+  isActive       Boolean             @default(true)
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  parent       GLAccount?    @relation("GLAccountHierarchy", fields: [parentId], references: [id])
+  children     GLAccount[]   @relation("GLAccountHierarchy")
+  journalLines JournalLine[]
+  budgetLineItems BudgetLineItem[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("gl_accounts")
+}
+
+model JournalEntry {
+  id             String        @id @default(uuid())
+  organizationId String
+  entryNumber    String        // auto: JE-2026-000001
+  description    String
+  date           DateTime
+  status         JournalStatus @default(DRAFT)
+  createdById    String
+  approvedById   String?
+  postedAt       DateTime?
+  reversalOfId   String?       @unique
+  periodId       String?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User          @relation("JournalCreator", fields: [createdById], references: [id])
+  approvedBy   User?         @relation("JournalApprover", fields: [approvedById], references: [id], onDelete: SetNull)
+  reversalOf   JournalEntry? @relation("JournalReversal", fields: [reversalOfId], references: [id])
+  reversedBy   JournalEntry? @relation("JournalReversal")
+  period       FiscalPeriod? @relation(fields: [periodId], references: [id])
+  lines        JournalLine[]
+
+  @@index([organizationId])
+  @@index([status])
+  @@index([date])
+  @@map("journal_entries")
+}
+
+model JournalLine {
+  id             String  @id @default(uuid())
+  journalEntryId String
+  glAccountId    String
+  costCenterId   String?
+  description    String?
+  debit          Decimal @default(0) @db.Decimal(15, 2)
+  credit         Decimal @default(0) @db.Decimal(15, 2)
+
+  journalEntry JournalEntry @relation(fields: [journalEntryId], references: [id], onDelete: Cascade)
+  glAccount    GLAccount    @relation(fields: [glAccountId], references: [id])
+  costCenter   CostCenter?  @relation(fields: [costCenterId], references: [id])
+
+  @@index([journalEntryId])
+  @@index([glAccountId])
+  @@map("journal_lines")
+}
+
+model FiscalPeriod {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String   // e.g. "Jan 2026"
+  startDate      DateTime
+  endDate        DateTime
+  isClosed       Boolean  @default(false)
+  closedById     String?
+  closedAt       DateTime?
+  createdAt      DateTime @default(now())
+
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  closedBy       User?          @relation("PeriodCloser", fields: [closedById], references: [id])
+  journalEntries JournalEntry[]
+
+  @@unique([organizationId, name])
+  @@map("fiscal_periods")
+}
+
+// ── Phase 3: Approval Workflows & Expense Management ────────────────────
+
+model WorkflowTemplate {
+  id             String       @id @default(uuid())
+  organizationId String
+  type           WorkflowType
+  name           String
+  config         Json?        // thresholds, conditions
+  isActive       Boolean      @default(true)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  organization Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  steps        WorkflowTemplateStep[]
+  instances    WorkflowInstance[]
+
+  @@map("workflow_templates")
+}
+
+model WorkflowTemplateStep {
+  id           String  @id @default(uuid())
+  templateId   String
+  stepOrder    Int
+  name         String
+  approverRole OrgRole
+  condition    Json?   // e.g. { "minAmount": 5000 }
+
+  template WorkflowTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
+
+  @@unique([templateId, stepOrder])
+  @@map("workflow_template_steps")
+}
+
+model WorkflowInstance {
+  id            String         @id @default(uuid())
+  templateId    String
+  resourceType  String         // "expense", "journal_entry", "invoice", "vendor"
+  resourceId    String
+  status        WorkflowStatus @default(IN_PROGRESS)
+  submittedById String
+  currentStep   Int            @default(1)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  template    WorkflowTemplate     @relation(fields: [templateId], references: [id])
+  submittedBy User                 @relation("WorkflowSubmitter", fields: [submittedById], references: [id])
+  stepActions WorkflowStepAction[]
+
+  @@index([resourceType, resourceId])
+  @@map("workflow_instances")
+}
+
+model WorkflowStepAction {
+  id         String             @id @default(uuid())
+  instanceId String
+  stepOrder  Int
+  actorId    String?
+  status     WorkflowStepStatus @default(PENDING)
+  comment    String?
+  actedAt    DateTime?
+
+  instance WorkflowInstance @relation(fields: [instanceId], references: [id], onDelete: Cascade)
+  actor    User?            @relation(fields: [actorId], references: [id], onDelete: SetNull)
+
+  @@index([instanceId])
+  @@map("workflow_step_actions")
+}
+
+model Expense {
+  id             String        @id @default(uuid())
+  organizationId String
+  submittedById  String
+  departmentId   String?
+  costCenterId   String?
+  title          String
+  amount         Decimal       @db.Decimal(15, 2)
+  categorySlug   String?
+  receiptUrl     String?
+  status         ExpenseStatus @default(DRAFT)
+  policyViolations Json?
+  occurredAt     DateTime      @default(now())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  submittedBy  User         @relation(fields: [submittedById], references: [id])
+  department   Department?  @relation(fields: [departmentId], references: [id])
+  costCenter   CostCenter?  @relation(fields: [costCenterId], references: [id])
+
+  @@index([organizationId])
+  @@index([submittedById])
+  @@index([status])
+  @@map("expenses")
+}
+
+// ── Phase 4: Accounts Payable & Accounts Receivable ─────────────────────
+
+model Vendor {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  code           String
+  email          String?
+  taxId          String?
+  paymentTerms   Int      @default(30) // days
+  bankDetails    Json?
+  riskScore      Decimal? @db.Decimal(5, 2)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoices     Invoice[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("vendors")
+}
+
+model Invoice {
+  id             String        @id @default(uuid())
+  organizationId String
+  vendorId       String
+  invoiceNumber  String
+  amount         Decimal       @db.Decimal(15, 2)
+  taxAmount      Decimal       @default(0) @db.Decimal(15, 2)
+  totalAmount    Decimal       @db.Decimal(15, 2)
+  status         InvoiceStatus @default(RECEIVED)
+  dueDate        DateTime
+  lineItems      Json?
+  ocrData        Json?         // simulated OCR extraction
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  vendor       Vendor       @relation(fields: [vendorId], references: [id])
+  payments     Payment[]    @relation("InvoicePayments")
+
+  @@unique([organizationId, invoiceNumber])
+  @@index([organizationId])
+  @@index([vendorId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("invoices")
+}
+
+model Customer {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  code           String
+  email          String?
+  creditLimit    Decimal? @db.Decimal(15, 2)
+  paymentTerms   Int      @default(30) // days
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization     Organization      @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customerInvoices CustomerInvoice[]
+
+  @@unique([organizationId, code])
+  @@index([organizationId])
+  @@map("customers")
+}
+
+model CustomerInvoice {
+  id             String                @id @default(uuid())
+  organizationId String
+  customerId     String
+  invoiceNumber  String
+  totalAmount    Decimal               @db.Decimal(15, 2)
+  status         CustomerInvoiceStatus @default(DRAFT)
+  dueDate        DateTime
+  lineItems      Json?
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  customer     Customer     @relation(fields: [customerId], references: [id])
+  payments     Payment[]    @relation("CustomerInvoicePayments")
+
+  @@unique([organizationId, invoiceNumber])
+  @@index([organizationId])
+  @@index([customerId])
+  @@index([status])
+  @@index([dueDate])
+  @@map("customer_invoices")
+}
+
+model Payment {
+  id                String   @id @default(uuid())
+  organizationId    String
+  invoiceId         String?
+  customerInvoiceId String?
+  amount            Decimal  @db.Decimal(15, 2)
+  method            String   @default("bank_transfer")
+  reference         String?
+  paidAt            DateTime @default(now())
+  createdAt         DateTime @default(now())
+
+  organization    Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invoice         Invoice?         @relation("InvoicePayments", fields: [invoiceId], references: [id])
+  customerInvoice CustomerInvoice? @relation("CustomerInvoicePayments", fields: [customerInvoiceId], references: [id])
+
+  @@index([invoiceId])
+  @@index([customerInvoiceId])
+  @@map("payments")
+}
+
+// ── Phase 5: Budget Management ──────────────────────────────────────────
+
+model Budget {
+  id             String           @id @default(uuid())
+  organizationId String
+  departmentId   String
+  fiscalYear     Int
+  periodType     BudgetPeriodType @default(ANNUAL)
+  status         BudgetStatus     @default(DRAFT)
+  totalAmount    Decimal          @db.Decimal(15, 2)
+  createdById    String
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  organization Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  department   Department     @relation(fields: [departmentId], references: [id])
+  createdBy    User           @relation(fields: [createdById], references: [id])
+  lineItems    BudgetLineItem[]
+
+  @@unique([organizationId, departmentId, fiscalYear])
+  @@index([organizationId])
+  @@index([departmentId])
+  @@map("budgets")
+}
+
+model BudgetLineItem {
+  id           String  @id @default(uuid())
+  budgetId     String
+  glAccountId  String
+  description  String?
+  q1Amount     Decimal @default(0) @db.Decimal(15, 2)
+  q2Amount     Decimal @default(0) @db.Decimal(15, 2)
+  q3Amount     Decimal @default(0) @db.Decimal(15, 2)
+  q4Amount     Decimal @default(0) @db.Decimal(15, 2)
+  totalAmount  Decimal @default(0) @db.Decimal(15, 2)
+  actualAmount Decimal @default(0) @db.Decimal(15, 2)
+
+  budget    Budget    @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+  glAccount GLAccount @relation(fields: [glAccountId], references: [id])
+
+  @@index([budgetId])
+  @@map("budget_line_items")
+}
+
+model Report {
+  id             String   @id @default(uuid())
+  organizationId String
+  createdById    String
+  name           String
+  description    String?
+  category       String   @default("custom")
+  filters        Json     @default("{}")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation(fields: [createdById], references: [id])
+
+  @@index([organizationId])
+  @@map("reports")
+}
