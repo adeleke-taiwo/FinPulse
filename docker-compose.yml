@@ -1,0 +1,23 @@
+version: "3.8"
+
+services:
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: finpulse-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: finpulse
+      POSTGRES_USER: finpulse_user
+      POSTGRES_PASSWORD: finpulse_secret
+    volumes:
+      - finpulse_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finpulse_user -d finpulse"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  finpulse_data:
