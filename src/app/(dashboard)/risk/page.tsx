@@ -164,8 +164,8 @@ export default function RiskPage() {
                 <YAxis tick={{ fontSize: 11, fill: "var(--muted-foreground)" }} />
                 <Tooltip contentStyle={{ backgroundColor: "var(--card)", border: "1px solid var(--border)", borderRadius: "8px" }} />
                 <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {data.distribution.map((entry, i) => (
-                    <Cell key={i} fill={severityColors[entry.severity] || "var(--chart-1)"} />
+                  {data.distribution.map((entry) => (
+                    <Cell key={entry.severity} fill={severityColors[entry.severity] || "var(--chart-1)"} />
                   ))}
                 </Bar>
               </BarChart>

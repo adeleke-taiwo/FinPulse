@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requirePermission, isAuthError } from "@/lib/auth/api-auth";
 import {
   fetchCryptoPrices,
   scanAnomalies,
@@ -30,15 +30,8 @@ const JOBS: Record<string, () => Promise<void>> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role: string }).role;
-    if (userRole !== "ADMIN") {
-      return NextResponse.json({ error: "Admin only" }, { status: 403 });
-    }
+    const authResult = await requirePermission("admin", "delete");
+    if (isAuthError(authResult)) return authResult;
 
     const { job } = await request.json();
     const jobFn = JOBS[job];

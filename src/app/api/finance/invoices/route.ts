@@ -98,6 +98,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const vendor = await prisma.vendor.findFirst({
+      where: { id: vendorId, organizationId },
+    });
+    if (!vendor) {
+      return NextResponse.json(
+        { error: "Vendor not found in this organization" },
+        { status: 400 }
+      );
+    }
+
     const invoice = await prisma.invoice.create({
       data: {
         organizationId,

@@ -2,7 +2,7 @@
 
 **Enterprise Financial Management Platform** — A production-ready fintech application with ERP-grade accounting, real-time analytics, risk monitoring, and regulatory compliance.
 
-[Live Demo](https://finpulse-ten.vercel.app) | [Report Bug](https://github.com/adeleke-taiwo-dev/FinPulse/issues)
+[Live Demo](https://finpulse-ten.vercel.app) | [Report Bug](https://github.com/adeleke-taiwo/FinPulse/issues)
 
 > **Demo Credentials:** Admin — `admin@finpulse.io` / `admin123` | User — `user@finpulse.io` / `user123`
 
@@ -148,7 +148,7 @@ API-level enforcement via `requirePermission(module, action)`:
 
 ```bash
 # Clone the repository
-git clone https://github.com/adeleke-taiwo-dev/FinPulse.git
+git clone https://github.com/adeleke-taiwo/FinPulse.git
 cd FinPulse
 
 # Install dependencies
@@ -191,4 +191,4 @@ MIT
 
 ---
 
-Built by [Adeleke Taiwo](https://github.com/adeleke-taiwo-dev)
+Built by [Adeleke Taiwo](https://github.com/adeleke-taiwo)

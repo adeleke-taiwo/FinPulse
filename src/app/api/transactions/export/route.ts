@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requirePermission, isAuthError } from "@/lib/auth/api-auth";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const userRole = (session.user as { role: string }).role;
-    if (!["ADMIN", "ANALYST"].includes(userRole)) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
+    const authResult = await requirePermission("transactions", "view");
+    if (isAuthError(authResult)) return authResult;
 
     const { searchParams } = request.nextUrl;
     const format = searchParams.get("format") || "csv";
@@ -39,7 +32,7 @@ export async function GET(request: NextRequest) {
     // Audit log
     await prisma.auditLog.create({
       data: {
-        actorId: session.user.id,
+        actorId: authResult.userId,
         action: "transaction.export",
         resource: "transaction",
         details: { format, count: transactions.length },

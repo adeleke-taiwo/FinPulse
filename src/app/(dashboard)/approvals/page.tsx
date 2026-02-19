@@ -342,17 +342,6 @@ export default function ApprovalsPage() {
         </CardContent>
       </Card>
 
-      {/* Comment textarea for selected items */}
-      {data && data.data.length > 0 && (
-        <div className="space-y-3">
-          {data.data.map((item) => (
-            <div key={item.id} className="hidden">
-              {/* Hidden comment state maintained in comments record */}
-            </div>
-          ))}
-        </div>
-      )}
-
       {/* Select All */}
       {data && data.data.length > 0 && (
         <div className="flex items-center gap-3">

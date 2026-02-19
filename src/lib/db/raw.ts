@@ -1,5 +1,4 @@
 import { prisma } from "./index";
-import { Prisma } from "@prisma/client";
 
 export async function rawQuery<T = unknown>(
   sql: string,
@@ -24,10 +23,17 @@ export async function insertTimescaleMetric(data: {
   txCount?: number;
   isFlagged?: boolean;
 }): Promise<void> {
-  await prisma.$executeRaw`
-    INSERT INTO ts_transaction_metrics (time, account_id, category_id, tx_type, amount, tx_count, is_flagged)
-    VALUES (${data.time}, ${data.accountId ? Prisma.raw(`'${data.accountId}'::uuid`) : null}, ${data.categoryId ? Prisma.raw(`'${data.categoryId}'::uuid`) : null}, ${data.txType}, ${data.amount}, ${data.txCount ?? 1}, ${data.isFlagged ?? false})
-  `;
+  await prisma.$executeRawUnsafe(
+    `INSERT INTO ts_transaction_metrics (time, account_id, category_id, tx_type, amount, tx_count, is_flagged)
+     VALUES ($1, $2::uuid, $3::uuid, $4, $5, $6, $7)`,
+    data.time,
+    data.accountId || null,
+    data.categoryId || null,
+    data.txType,
+    data.amount,
+    data.txCount ?? 1,
+    data.isFlagged ?? false
+  );
 }
 
 export async function getTimeSeriesData(
@@ -37,7 +43,9 @@ export async function getTimeSeriesData(
   txType?: string
 ) {
   const view = granularity === "hourly" ? "ts_tx_hourly" : "ts_tx_daily";
-  const typeFilter = txType ? `AND tx_type = '${txType}'` : "";
+  const typeFilter = txType ? "AND tx_type = $3" : "";
+  const params: unknown[] = [startDate, endDate];
+  if (txType) params.push(txType);
 
   return rawQuery<{
     bucket: Date;
@@ -50,7 +58,7 @@ export async function getTimeSeriesData(
      FROM ${view}
      WHERE bucket >= $1 AND bucket <= $2 ${typeFilter}
      ORDER BY bucket ASC`,
-    [startDate, endDate]
+    params
   );
 }
 
