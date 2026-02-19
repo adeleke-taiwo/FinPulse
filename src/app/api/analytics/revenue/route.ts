@@ -11,21 +11,13 @@ export async function GET(request: NextRequest) {
     const to = searchParams.get("to") || new Date().toISOString().split("T")[0];
     const granularity = searchParams.get("granularity") || "daily";
 
-    let groupExpr: string;
-    let dateFormat: string;
-    switch (granularity) {
-      case "weekly":
-        groupExpr = "DATE_TRUNC('week', t.\"occurredAt\")";
-        dateFormat = "YYYY-\"W\"IW";
-        break;
-      case "monthly":
-        groupExpr = "DATE_TRUNC('month', t.\"occurredAt\")";
-        dateFormat = "YYYY-MM";
-        break;
-      default:
-        groupExpr = "DATE(t.\"occurredAt\")";
-        dateFormat = "YYYY-MM-DD";
-    }
+    // Static allowlist — no user input is ever interpolated into SQL
+    const GRANULARITY_SQL: Record<string, { groupExpr: string; dateFormat: string }> = {
+      weekly:  { groupExpr: "DATE_TRUNC('week', t.\"occurredAt\")",  dateFormat: "YYYY-\"W\"IW" },
+      monthly: { groupExpr: "DATE_TRUNC('month', t.\"occurredAt\")", dateFormat: "YYYY-MM" },
+      daily:   { groupExpr: "DATE(t.\"occurredAt\")",                dateFormat: "YYYY-MM-DD" },
+    };
+    const { groupExpr, dateFormat } = GRANULARITY_SQL[granularity] || GRANULARITY_SQL.daily;
 
     const timeSeries = await prisma.$queryRawUnsafe<
       { date: string; revenue: number; expenses: number; net: number }[]

@@ -1,18 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requirePermission, isAuthError } from "@/lib/auth/api-auth";
 import { resolveOrganizationId } from "@/lib/auth/resolve-org";
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const authResult = await requirePermission("ar", "view");
+    if (isAuthError(authResult)) return authResult;
 
     const { searchParams } = request.nextUrl;
     const organizationId = await resolveOrganizationId(
-      session.user.id,
+      authResult.userId,
       searchParams.get("organizationId")
     );
     if (!organizationId) {
@@ -67,10 +65,8 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const authResult = await requirePermission("ar", "create");
+    if (isAuthError(authResult)) return authResult;
 
     const body = await request.json();
     const {
@@ -82,7 +78,7 @@ export async function POST(request: NextRequest) {
     } = body;
 
     const organizationId = await resolveOrganizationId(
-      session.user.id,
+      authResult.userId,
       body.organizationId ?? null
     );
     if (!organizationId) {
@@ -92,6 +88,16 @@ export async function POST(request: NextRequest) {
     if (!customerId || !invoiceNumber || !totalAmount || !dueDate) {
       return NextResponse.json(
         { error: "customerId, invoiceNumber, totalAmount, and dueDate are required" },
+        { status: 400 }
+      );
+    }
+
+    const customer = await prisma.customer.findFirst({
+      where: { id: customerId, organizationId },
+    });
+    if (!customer) {
+      return NextResponse.json(
+        { error: "Customer not found in this organization" },
         { status: 400 }
       );
     }

@@ -107,6 +107,15 @@ export async function POST(request: NextRequest) {
 
     let subsidiary;
     if (subsidiaryId) {
+      const existing = await prisma.subsidiary.findFirst({
+        where: { id: subsidiaryId, organizationId },
+      });
+      if (!existing) {
+        return NextResponse.json(
+          { error: "Subsidiary not found in this organization" },
+          { status: 404 }
+        );
+      }
       subsidiary = await prisma.subsidiary.update({
         where: { id: subsidiaryId },
         data: { name, code, country: country || "US", currency: currency || "USD" },

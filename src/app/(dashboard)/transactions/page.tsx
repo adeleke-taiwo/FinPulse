@@ -107,7 +107,10 @@ export default function TransactionsPage() {
             return true;
           }).slice(0, 5);
         });
-      } catch { /* ignore */ }
+      } catch { /* ignore parse errors */ }
+    };
+    eventSource.onerror = () => {
+      eventSource.close();
     };
     return () => eventSource.close();
   }, []);

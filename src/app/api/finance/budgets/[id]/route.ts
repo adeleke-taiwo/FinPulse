@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requirePermission, isAuthError } from "@/lib/auth/api-auth";
 import { resolveOrganizationId } from "@/lib/auth/resolve-org";
 
 export async function GET(
@@ -8,10 +8,8 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth();
-    if (!session?.user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+    const authResult = await requirePermission("budgets", "view");
+    if (isAuthError(authResult)) return authResult;
 
     const { id } = await params;
 
@@ -32,8 +30,8 @@ export async function GET(
       return NextResponse.json({ error: "Budget not found" }, { status: 404 });
     }
 
-    const organizationId = await resolveOrganizationId(session.user.id, null);
-    if (organizationId && budget.organizationId !== organizationId) {
+    const organizationId = await resolveOrganizationId(authResult.userId, null);
+    if (!organizationId || budget.organizationId !== organizationId) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
