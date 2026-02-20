@@ -55,7 +55,7 @@ export default function CustomersPage() {
         });
       }
     } catch {
-      // silently fail
+      setError("Failed to load customers.");
     } finally {
       setLoading(false);
     }

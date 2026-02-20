@@ -53,6 +53,7 @@ export default function JournalEntryDetailPage() {
   const [entry, setEntry] = useState<JournalEntryDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -65,7 +66,7 @@ export default function JournalEntryDetailPage() {
           }
         }
       } catch {
-        // silently fail
+        setError("Failed to load journal entry.");
       } finally {
         setLoading(false);
       }
@@ -89,7 +90,7 @@ export default function JournalEntryDetailPage() {
         }
       }
     } catch {
-      // network error
+      setError("Failed to perform action.");
     } finally {
       setActionLoading(false);
     }

@@ -60,9 +60,12 @@ export function InvoiceForm({ onSubmit, entities, entityLabel, type }: InvoiceFo
   const taxAmount = subtotal * (taxRate / 100);
   const total = subtotal + taxAmount;
 
+  const hasValidLines = lines.some((l) => l.description.trim() && l.quantity > 0 && l.unitPrice > 0);
+
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    onSubmit({ invoiceNumber, vendorOrCustomerId: entityId, dueDate, lineItems: lines, taxRate });
+    if (!hasValidLines) return;
+    onSubmit({ invoiceNumber, vendorOrCustomerId: entityId, dueDate, lineItems: lines.filter((l) => l.description.trim()), taxRate });
   }
 
   return (
@@ -206,7 +209,8 @@ export function InvoiceForm({ onSubmit, entities, entityLabel, type }: InvoiceFo
       <div className="flex justify-end">
         <button
           type="submit"
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
+          disabled={!hasValidLines}
+          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {type === "ap" ? "Save Invoice" : "Create Invoice"}
         </button>

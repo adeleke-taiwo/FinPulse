@@ -47,6 +47,7 @@ export default function AccountLedgerPage() {
   const [account, setAccount] = useState<GLAccountDetail | null>(null);
   const [lines, setLines] = useState<JournalEntryLine[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -81,7 +82,7 @@ export default function AccountLedgerPage() {
           }
         }
       } catch {
-        // silently fail
+        setError("Failed to load account details.");
       } finally {
         setLoading(false);
       }

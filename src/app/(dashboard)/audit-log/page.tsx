@@ -31,6 +31,7 @@ export default function AuditLogPage() {
   const [page, setPage] = useState(1);
   const [actionFilter, setActionFilter] = useState("");
   const [resourceFilter, setResourceFilter] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -42,7 +43,7 @@ export default function AuditLogPage() {
       const res = await fetch(`/api/audit-log?${params}`);
       if (res.ok) setData(await res.json());
     } catch {
-      // silently fail
+      setError("Failed to load audit log.");
     } finally {
       setLoading(false);
     }

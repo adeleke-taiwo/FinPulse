@@ -55,7 +55,7 @@ export default function NewJournalEntryPage() {
           setGlAccounts(flat);
         }
       } catch {
-        // silently fail
+        setError("Failed to load GL accounts.");
       } finally {
         setLoading(false);
       }

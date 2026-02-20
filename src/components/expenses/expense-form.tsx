@@ -162,7 +162,7 @@ export function ExpenseForm({ departments, costCenters, onSubmit }: ExpenseFormP
               type="button"
               className="flex items-center gap-1 rounded-md border border-border px-3 py-2 text-sm hover:bg-accent"
               title="Upload receipt (simulated)"
-              onClick={() => setReceiptUrl("https://receipts.finpulse.io/receipt-" + Date.now() + ".pdf")}
+              onClick={() => setReceiptUrl("/receipts/receipt-" + Date.now() + ".pdf")}
             >
               <Upload className="h-3.5 w-3.5" />
             </button>

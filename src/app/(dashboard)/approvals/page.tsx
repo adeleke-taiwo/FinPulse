@@ -47,6 +47,7 @@ export default function ApprovalsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [comments, setComments] = useState<Record<string, string>>({});
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchApprovals = useCallback(async () => {
     setLoading(true);
@@ -101,7 +102,7 @@ export default function ApprovalsPage() {
         });
       }
     } catch {
-      // silently fail
+      setError("Failed to load approvals.");
     } finally {
       setLoading(false);
     }
@@ -146,7 +147,7 @@ export default function ApprovalsPage() {
         });
       }
     } catch {
-      // silently fail
+      setError("Failed to process approval.");
     } finally {
       setActionLoading(null);
     }
@@ -166,7 +167,7 @@ export default function ApprovalsPage() {
         fetchApprovals();
       }
     } catch {
-      // silently fail
+      setError("Failed to bulk approve.");
     } finally {
       setActionLoading(null);
     }

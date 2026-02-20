@@ -26,6 +26,7 @@ export default function FinancialStatementsPage() {
   const [incomeStatement, setIncomeStatement] = useState<IncomeStatement | null>(null);
   const [balanceSheet, setBalanceSheet] = useState<BalanceSheet | null>(null);
   const [cashFlow, setCashFlow] = useState<CashFlowStatement | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchStatement = useCallback(async () => {
     setLoading(true);
@@ -54,7 +55,7 @@ export default function FinancialStatementsPage() {
         }
       }
     } catch {
-      // silently fail
+      setError("Failed to load financial statement.");
     } finally {
       setLoading(false);
     }

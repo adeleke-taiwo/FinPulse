@@ -43,6 +43,7 @@ export default function ChartOfAccountsPage() {
   const [accounts, setAccounts] = useState<GLAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchAccounts = useCallback(async () => {
@@ -53,7 +54,7 @@ export default function ChartOfAccountsPage() {
         setAccounts(json.data);
       }
     } catch {
-      // silently fail
+      setError("Failed to load chart of accounts.");
     } finally {
       setLoading(false);
     }

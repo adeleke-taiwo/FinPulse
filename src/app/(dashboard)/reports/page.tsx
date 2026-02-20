@@ -225,7 +225,7 @@ export default function ReportsPage() {
           setSavedReports(json.savedReports || []);
         }
       } catch {
-        // silently fail
+        setError("Failed to load saved reports.");
       }
     }
     loadSaved();
@@ -238,7 +238,7 @@ export default function ReportsPage() {
         setSavedReports((prev) => prev.filter((r) => r.id !== id));
       }
     } catch {
-      // silently fail
+      setError("Failed to delete report.");
     }
   }
 

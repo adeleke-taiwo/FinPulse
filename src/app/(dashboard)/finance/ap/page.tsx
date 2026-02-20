@@ -47,6 +47,7 @@ const invoiceStatusColors: Record<string, string> = {
 export default function APDashboardPage() {
   const [data, setData] = useState<APDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -93,7 +94,7 @@ export default function APDashboardPage() {
           });
         }
       } catch {
-        // silently fail
+        setError("Failed to load payables data.");
       } finally {
         setLoading(false);
       }

@@ -49,6 +49,7 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchExpenses = useCallback(async () => {
     setLoading(true);
@@ -63,7 +64,7 @@ export default function ExpensesPage() {
       const res = await fetch(`/api/expenses?${params}`);
       if (res.ok) setExpenses(await res.json());
     } catch {
-      // silently fail
+      setError("Failed to load expenses.");
     } finally {
       setLoading(false);
     }

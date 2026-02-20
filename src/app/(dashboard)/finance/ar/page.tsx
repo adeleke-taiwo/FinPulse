@@ -47,6 +47,7 @@ const invoiceStatusColors: Record<string, string> = {
 export default function ARDashboardPage() {
   const [data, setData] = useState<ARDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {
@@ -86,7 +87,7 @@ export default function ARDashboardPage() {
           });
         }
       } catch {
-        // silently fail
+        setError("Failed to load receivables data.");
       } finally {
         setLoading(false);
       }

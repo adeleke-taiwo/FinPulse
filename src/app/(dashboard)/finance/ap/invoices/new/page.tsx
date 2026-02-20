@@ -55,7 +55,7 @@ export default function NewAPInvoicePage() {
           setVendors(json.data || json);
         }
       } catch {
-        // silently fail
+        setError("Failed to load vendors.");
       } finally {
         setLoading(false);
       }
