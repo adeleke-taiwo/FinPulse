@@ -41,7 +41,7 @@ Built to demonstrate the ability to architect production-grade fintech software:
 | **Authentication** | NextAuth v5 with JWT strategy, credential-based login, and session management |
 | **Authorization** | 8 organizational roles with granular module-level permissions (view, create, edit, delete, approve, export) |
 | **Database Design** | 35 Prisma models with 21 enums, referential integrity, and Decimal precision for financial data |
-| **Security** | Parameterized SQL for raw queries, Zod validation, audit logging with actor tracking, org-level data isolation |
+| **Security** | Parameterized SQL, Zod validation, audit logging, org-level data isolation |
 | **Real-Time Data** | Server-Sent Events for live transaction feed, auto-refresh polling for KPI dashboards |
 | **Production Deployment** | Vercel (serverless) + Neon PostgreSQL (serverless pooling) with zero-downtime deploys |
 
@@ -50,34 +50,23 @@ Built to demonstrate the ability to architect production-grade fintech software:
 ## Key Features
 
 ### Accounting & Finance (ERP)
-| Feature | Description |
-|:--------|:------------|
-| **General Ledger** | Chart of accounts with drill-down into individual GL account activity |
-| **Journal Entries** | Double-entry with debit/credit line editor, approval workflow (Draft → Pending → Approved → Posted) |
-| **Accounts Payable** | Vendor management, purchase invoices with multi-line items, tax calculation, payment processing |
-| **Accounts Receivable** | Customer management, sales invoices, aging reports, payment tracking |
-| **Budgets** | Department-level budgets with GL account line items and quarterly utilization tracking |
-| **Financial Statements** | Auto-generated income statement, balance sheet, and trial balance |
-| **Fiscal Periods** | Configurable period open/close controls for accounting cycles |
-| **Forecasting** | Revenue and expense projections with trend analysis |
+- **General Ledger** — Chart of accounts with drill-down into individual GL account activity
+- **Journal Entries** — Double-entry with debit/credit line editor and approval workflow (Draft → Pending → Approved → Posted)
+- **Accounts Payable** — Vendor management, purchase invoices, tax calculation, payment processing
+- **Accounts Receivable** — Customer management, sales invoices, aging reports, payment tracking
+- **Budgets & Statements** — Department-level budgets with GL line items, auto-generated income statement, balance sheet, trial balance, and forecasting
 
-### Analytics & Intelligence
+### Analytics, Risk & Compliance
 - **KPI Dashboard** — Revenue, expenses, profit margins, cash flow with auto-refresh polling
 - **Revenue Analytics** — Trend analysis with daily/weekly/monthly granularity and category breakdown
-- **Cohort Analysis** — Customer and transaction cohort tracking
 - **Anomaly Detection** — Automated flagging of unusual financial patterns
-- **Custom Report Builder** — Configurable templates with CSV export
-
-### Risk & Compliance
 - **Risk Monitoring** — Transaction risk scoring with severity distribution and drill-down
-- **SOX Compliance** — Sarbanes-Oxley control tracking and monitoring
-- **Segregation of Duties** — Role conflict detection and resolution
-- **Audit Log** — Immutable trail with actor tracking, IP logging, and PII masking
+- **SOX Compliance** — Sarbanes-Oxley control tracking, segregation of duties, immutable audit log
 
 ### Administration
-- **Multi-Entity Support** — Multi-subsidiary organizations with separate entities
 - **8 Organizational Roles** — Super Admin, CFO, Finance Manager, Department Head, Analyst, Employee, Auditor, External Accountant
-- **Granular Permissions** — Module-level access control enforced at the API layer
+- **Granular Permissions** — Module-level access control enforced at the API layer via `requirePermission(module, action)`
+- **Multi-Entity Support** — Multi-subsidiary organizations with separate entities
 - **Workflow Engine** — Visual approval workflow designer with step conditions
 
 ---
@@ -159,20 +148,13 @@ src/
 |:---------|:--------|:-------|
 | `POST /api/auth/*` | Register, login, session management | Public |
 | `GET /api/dashboard` | KPI metrics, recent transactions, sparklines | All roles |
-| `GET /api/transactions` | Paginated transactions with filtering, sorting, search | All roles |
-| `GET /api/transactions/export` | CSV export of transaction data | Admin/Analyst |
-| `GET /api/transactions/sse` | Server-Sent Events real-time feed | All roles |
-| `GET/POST /api/finance/gl` | Chart of accounts, GL activity | Finance roles |
+| `GET/POST /api/transactions/*` | Browse, create, SSE live feed, CSV export | All (export: Analyst+) |
+| `GET/POST /api/finance/gl` | Chart of accounts, GL account activity | Finance roles |
 | `GET/POST /api/finance/journal` | Journal entries with line items | Finance roles |
-| `GET/POST /api/finance/invoices` | AP invoices with vendor validation | Finance roles |
-| `GET/POST /api/finance/customer-invoices` | AR invoices with customer validation | Finance roles |
-| `GET/POST /api/finance/vendors` | Vendor management with pagination | Finance roles |
-| `GET/POST /api/finance/customers` | Customer management | Finance roles |
-| `GET/POST /api/finance/budgets` | Department budgets with line items | Finance roles |
-| `GET /api/finance/statements` | Income statement, balance sheet | Finance roles |
-| `GET /api/finance/trial-balance` | Trial balance report | Finance roles |
-| `GET /api/finance/aging` | AP/AR aging reports | Finance roles |
-| `GET /api/finance/forecasting` | Revenue/expense projections | Analyst+ |
+| `GET/POST /api/finance/{invoices,customer-invoices}` | AP & AR invoices with vendor/customer validation | Finance roles |
+| `GET/POST /api/finance/{vendors,customers}` | Vendor and customer management | Finance roles |
+| `GET/POST /api/finance/budgets` | Department budgets with GL line items | Finance roles |
+| `GET /api/finance/{statements,trial-balance,aging,forecasting}` | Financial reports and projections | Finance roles |
 | `GET /api/analytics/*` | Revenue trends, KPIs, cohorts, anomalies | Analyst+ |
 | `GET /api/risk` | Risk scores, severity distribution | Analyst+ |
 | `GET/POST /api/expenses` | Expense submission and tracking | All roles |
@@ -181,7 +163,6 @@ src/
 | `GET /api/audit-log` | Immutable activity log | Admin |
 | `GET/POST /api/admin/*` | Organization, members, roles, departments | Admin |
 | `POST /api/upload` | CSV data import with mapping | Admin |
-| `POST /api/cron` | Scheduled job execution | Admin |
 
 ### Permission System
 
@@ -201,11 +182,9 @@ API-level enforcement via `requirePermission(module, action)`:
 
 - **Parameterized SQL** — all raw queries use positional parameters (`$1, $2`); no string interpolation in SQL
 - **Organization isolation** — every data-mutating endpoint validates resource ownership against the user's organization
-- **Permission enforcement** — centralized `requirePermission(module, action)` on all 44 API routes
-- **Decimal precision** — financial amounts stored as PostgreSQL `DECIMAL` and serialized correctly in JSON responses
+- **Permission enforcement** — centralized `requirePermission(module, action)` on all API routes
 - **Audit logging** — every sensitive mutation logged with actor ID, action, resource, and timestamp
 - **Input validation** — Zod schemas reject malformed requests before they reach business logic
-- **File upload limits** — 50MB cap with type validation on CSV imports
 
 ---
 
