@@ -75,6 +75,7 @@ export default function MembersPage() {
   // Change role
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editRole, setEditRole] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchMembers = useCallback(async () => {
     setLoading(true);
@@ -91,7 +92,7 @@ export default function MembersPage() {
         setData(await res.json());
       }
     } catch {
-      // silently fail
+      setError("Failed to load members.");
     } finally {
       setLoading(false);
     }
@@ -124,7 +125,7 @@ export default function MembersPage() {
         fetchMembers();
       }
     } catch {
-      // silently fail
+      setError("Failed to add member.");
     } finally {
       setSaving(false);
     }
@@ -146,7 +147,7 @@ export default function MembersPage() {
         fetchMembers();
       }
     } catch {
-      // silently fail
+      setError("Failed to change role.");
     } finally {
       setSaving(false);
     }

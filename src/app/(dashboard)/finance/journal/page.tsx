@@ -50,6 +50,7 @@ export default function JournalEntriesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);
@@ -67,7 +68,7 @@ export default function JournalEntriesPage() {
         setData(await res.json());
       }
     } catch {
-      // silently fail
+      setError("Failed to load journal entries.");
     } finally {
       setLoading(false);
     }

@@ -33,6 +33,7 @@ export default function OrganizationPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   // Editable form state
   const [formName, setFormName] = useState("");
@@ -61,7 +62,7 @@ export default function OrganizationPage() {
         setFormPrimaryColor(data.primaryColor || "");
       }
     } catch {
-      // silently fail
+      setError("Failed to load organization data.");
     } finally {
       setLoading(false);
     }
@@ -93,7 +94,7 @@ export default function OrganizationPage() {
         setTimeout(() => setSuccessMsg(""), 3000);
       }
     } catch {
-      // silently fail
+      setError("Failed to load organization data.");
     } finally {
       setSaving(false);
     }
@@ -348,7 +349,7 @@ export default function OrganizationPage() {
                       fetchOrg();
                     }
                   } catch {
-                    // network error
+                    setError("Failed to save subsidiary.");
                   } finally {
                     setSaving(false);
                   }

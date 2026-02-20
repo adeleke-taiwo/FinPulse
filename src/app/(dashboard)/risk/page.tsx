@@ -65,6 +65,7 @@ export default function RiskPage() {
   const [page, setPage] = useState(1);
   const [severityFilter, setSeverityFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -76,7 +77,7 @@ export default function RiskPage() {
       const res = await fetch(`/api/risk?${params}`);
       if (res.ok) setData(await res.json());
     } catch {
-      // silently fail
+      setError("Failed to load risk data.");
     } finally {
       setLoading(false);
     }
@@ -90,6 +91,7 @@ export default function RiskPage() {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-foreground">Risk Management</h1>
+        {error && <div className="rounded-md border border-destructive/50 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>}
         <Skeleton className="h-[400px]" />
       </div>
     );

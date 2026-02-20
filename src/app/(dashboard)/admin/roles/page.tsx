@@ -36,6 +36,7 @@ export default function RolesPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newPermissions, setNewPermissions] = useState<PermissionMap>({});
+  const [error, setError] = useState<string | null>(null);
 
   const fetchRoles = useCallback(async () => {
     try {
@@ -45,7 +46,7 @@ export default function RolesPage() {
         setRoles(json.data);
       }
     } catch {
-      // silently fail
+      setError("Failed to load roles.");
     } finally {
       setLoading(false);
     }
@@ -95,7 +96,7 @@ export default function RolesPage() {
         setSelectedCustomRole(null);
       }
     } catch {
-      // silently fail
+      setError("Failed to save role.");
     } finally {
       setSaving(false);
     }
@@ -120,7 +121,7 @@ export default function RolesPage() {
         fetchRoles();
       }
     } catch {
-      // silently fail
+      setError("Failed to create role.");
     } finally {
       setSaving(false);
     }

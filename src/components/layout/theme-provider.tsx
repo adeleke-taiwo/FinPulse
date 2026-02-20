@@ -15,12 +15,12 @@ const ThemeContext = createContext<ThemeContextValue>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("system");
-
-  useEffect(() => {
-    const stored = localStorage.getItem("finpulse-theme") as Theme | null;
-    if (stored) setTheme(stored);
-  }, []);
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      return (localStorage.getItem("finpulse-theme") as Theme) || "system";
+    }
+    return "system";
+  });
 
   useEffect(() => {
     const root = document.documentElement;

@@ -61,7 +61,7 @@ export default function VendorsPage() {
         });
       }
     } catch {
-      // silently fail
+      setError("Failed to load vendors.");
     } finally {
       setLoading(false);
     }

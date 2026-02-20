@@ -35,6 +35,7 @@ export default function DepartmentsPage() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Form state
   const [formName, setFormName] = useState("");
@@ -54,7 +55,7 @@ export default function DepartmentsPage() {
         setExpanded(ids);
       }
     } catch {
-      // silently fail
+      setError("Failed to load departments.");
     } finally {
       setLoading(false);
     }
@@ -101,7 +102,7 @@ export default function DepartmentsPage() {
         fetchDepartments();
       }
     } catch {
-      // silently fail
+      setError("Failed to create department.");
     } finally {
       setSaving(false);
     }

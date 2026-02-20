@@ -30,7 +30,7 @@ export default function NewARInvoicePage() {
           setCustomers(json.data || json);
         }
       } catch {
-        // silently fail
+        setError("Failed to load customers.");
       } finally {
         setLoading(false);
       }

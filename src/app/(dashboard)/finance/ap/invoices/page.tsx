@@ -44,6 +44,7 @@ export default function APInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusTab, setStatusTab] = useState("All");
+  const [error, setError] = useState<string | null>(null);
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
@@ -54,7 +55,7 @@ export default function APInvoicesPage() {
       const res = await fetch(`/api/finance/invoices?${params}`);
       if (res.ok) setData(await res.json());
     } catch {
-      // silently fail
+      setError("Failed to load invoices.");
     } finally {
       setLoading(false);
     }

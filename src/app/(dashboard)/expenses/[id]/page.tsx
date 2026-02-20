@@ -70,7 +70,7 @@ export default function ExpenseDetailPage() {
         const res = await fetch(`/api/expenses/${params.id}`);
         if (res.ok) setExpense(await res.json());
       } catch {
-        // silently fail
+        setError("Failed to load expense details.");
       } finally {
         setLoading(false);
       }
