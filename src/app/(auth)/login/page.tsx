@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 const DEMO_ACCOUNTS = [
-  { label: "Super Admin", email: "admin@finpulse.io", password: "admin123" },
+  { label: "Super Admin", email: "admin@acme.io", password: "admin123" },
   { label: "CFO", email: "cfo@acme.io", password: "demo123" },
   { label: "Finance Mgr", email: "finance@acme.io", password: "demo123" },
   { label: "Dept Head", email: "manager@acme.io", password: "demo123" },
