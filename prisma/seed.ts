@@ -80,7 +80,7 @@ async function main() {
   for (let i = 0; i < 2; i++) {
     users.push({
       id: uuid(),
-      email: i === 0 ? "admin@finpulse.io" : `admin${i + 1}@finpulse.io`,
+      email: i === 0 ? "admin@acme.io" : `admin${i + 1}@acme.io`,
       passwordHash,
       firstName: FIRST_NAMES[i],
       lastName: LAST_NAMES[i],
@@ -92,7 +92,7 @@ async function main() {
   for (let i = 0; i < 8; i++) {
     users.push({
       id: uuid(),
-      email: i === 0 ? "analyst@finpulse.io" : `analyst${i + 1}@finpulse.io`,
+      email: i === 0 ? "analyst@acme.io" : `analyst${i + 1}@acme.io`,
       passwordHash: analystHash,
       firstName: FIRST_NAMES[i + 2],
       lastName: LAST_NAMES[i + 2],
@@ -104,7 +104,7 @@ async function main() {
   for (let i = 0; i < 40; i++) {
     users.push({
       id: uuid(),
-      email: i === 0 ? "user@finpulse.io" : `user${i + 1}@finpulse.io`,
+      email: i === 0 ? "user@acme.io" : `user${i + 1}@acme.io`,
       passwordHash: userHash,
       firstName: FIRST_NAMES[i % FIRST_NAMES.length],
       lastName: LAST_NAMES[(i + 10) % LAST_NAMES.length],

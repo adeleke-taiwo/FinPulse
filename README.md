@@ -4,7 +4,7 @@
 
 [Live Demo](https://finpulse-ten.vercel.app) | [Report Bug](https://github.com/adeleke-taiwo/FinPulse/issues)
 
-> **Demo Credentials:** Admin — `admin@finpulse.io` / `admin123` | User — `user@finpulse.io` / `user123`
+> **Demo Credentials:** Admin — `admin@acme.io` / `admin123` | User — `employee@acme.io` / `demo123`
 
 ---
 

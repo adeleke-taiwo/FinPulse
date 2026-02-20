@@ -60,7 +60,7 @@ async function main() {
 
   // ── Demo Users (create or ensure exist) ──
   const demoUsers = [
-    { id: ADMIN_ID, email: "admin@finpulse.io", passwordHash: adminHash, firstName: "System", lastName: "Admin", role: "ADMIN" as const },
+    { id: ADMIN_ID, email: "admin@acme.io", passwordHash: adminHash, firstName: "System", lastName: "Admin", role: "ADMIN" as const },
     { id: CFO_ID, email: "cfo@acme.io", passwordHash, firstName: "Sarah", lastName: "Chen", role: "ANALYST" as const },
     { id: FM_ID, email: "finance@acme.io", passwordHash, firstName: "Michael", lastName: "Torres", role: "ANALYST" as const },
     { id: DH_ID, email: "manager@acme.io", passwordHash, firstName: "Jessica", lastName: "Williams", role: "USER" as const },
@@ -889,7 +889,7 @@ async function main() {
   console.log(`  ${customers.length} customers, ${arInvoices.length} AR invoices, ${payments.length} payments`);
   console.log(`  ${expenses.length} expenses, ${wfCount} workflow instances, ${acmeDepts.length} budgets`);
   console.log("\nDemo Accounts:");
-  console.log("  admin@finpulse.io / admin123 (Super Admin)");
+  console.log("  admin@acme.io / admin123 (Super Admin)");
   console.log("  cfo@acme.io / demo123 (CFO)");
   console.log("  finance@acme.io / demo123 (Finance Manager)");
   console.log("  manager@acme.io / demo123 (Department Head)");
