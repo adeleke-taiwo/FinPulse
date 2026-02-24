@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   ShieldCheck,
   CheckCircle,
@@ -14,13 +12,7 @@ import {
 import { getSOXSummary } from "@/lib/compliance/sox-controls";
 
 export default function CompliancePage() {
-  const [summary, setSummary] = useState<ReturnType<typeof getSOXSummary> | null>(null);
-
-  useEffect(() => {
-    setSummary(getSOXSummary());
-  }, []);
-
-  if (!summary) return null;
+  const summary = getSOXSummary();
 
   const { total, pass, fail, warning, complianceRate } = summary;
 

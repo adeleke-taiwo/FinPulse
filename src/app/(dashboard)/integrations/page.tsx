@@ -8,10 +8,6 @@ import {
   Users,
   Bell,
   ArrowRight,
-  CreditCard,
-  FileSpreadsheet,
-  Building2,
-  MessageSquare,
 } from "lucide-react";
 
 const integrationCategories = [

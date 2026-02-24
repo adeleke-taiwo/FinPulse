@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, X, Clock, User, ChevronRight } from "lucide-react";
+import { Check, X, Clock, User } from "lucide-react";
 import { cn, toTitleCase } from "@/lib/utils";
 
 interface StepAction {

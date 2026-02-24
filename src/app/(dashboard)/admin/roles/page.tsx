@@ -36,7 +36,7 @@ export default function RolesPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newRoleName, setNewRoleName] = useState("");
   const [newPermissions, setNewPermissions] = useState<PermissionMap>({});
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const fetchRoles = useCallback(async () => {
     try {

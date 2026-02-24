@@ -1,6 +1,6 @@
 "use client";
 
-import { Banknote, TrendingUp } from "lucide-react";
+import { Banknote } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface CashPositionProps {

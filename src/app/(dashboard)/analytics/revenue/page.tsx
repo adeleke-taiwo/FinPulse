@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -31,18 +31,18 @@ export default function RevenueAnalyticsPage() {
   const [to, setTo] = useState("2025-12-31");
   const [granularity, setGranularity] = useState<"daily" | "weekly" | "monthly">("monthly");
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    const res = await fetch(
-      `/api/analytics/revenue?from=${from}&to=${to}&granularity=${granularity}`
-    );
-    if (res.ok) setData(await res.json());
-    setLoading(false);
-  }, [from, to, granularity]);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let active = true;
+    fetch(`/api/analytics/revenue?from=${from}&to=${to}&granularity=${granularity}`)
+      .then(async (res) => {
+        if (!active) return;
+        if (res.ok) setData(await res.json());
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [from, to, granularity]);
 
   if (loading || !data) {
     return (

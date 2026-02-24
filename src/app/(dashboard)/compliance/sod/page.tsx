@@ -1,26 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SoDMatrix } from "@/components/compliance/sod-matrix";
 import { getSoDMatrix } from "@/lib/compliance/sod";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 
+function getMatrixDataSafe() {
+  try {
+    return getSoDMatrix();
+  } catch {
+    return { roles: [], conflicts: {} } as ReturnType<typeof getSoDMatrix>;
+  }
+}
+
 export default function SoDPage() {
-  const [matrixData, setMatrixData] = useState<ReturnType<typeof getSoDMatrix> | null>(null);
-
-  useEffect(() => {
-    try {
-      const result = getSoDMatrix();
-      setMatrixData(result);
-    } catch {
-      // If getSoDMatrix fails due to missing deps, provide fallback
-      setMatrixData({ roles: [], conflicts: {} } as ReturnType<typeof getSoDMatrix>);
-    }
-  }, []);
-
-  if (!matrixData) return null;
+  const matrixData = getMatrixDataSafe();
 
   return (
     <div className="space-y-6">

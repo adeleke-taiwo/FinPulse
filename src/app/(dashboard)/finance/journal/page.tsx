@@ -50,7 +50,7 @@ export default function JournalEntriesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const fetchEntries = useCallback(async () => {
     setLoading(true);

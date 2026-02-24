@@ -33,16 +33,16 @@ export default function FiscalPeriodsPage() {
         setPeriods(json.data || []);
       } else {
         // Use representative mock data
-        useMockData();
+        loadMockData();
       }
     } catch {
-      useMockData();
+      loadMockData();
     } finally {
       setLoading(false);
     }
   }, []);
 
-  function useMockData() {
+  function loadMockData() {
     const year = new Date().getFullYear();
     const months = [
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",

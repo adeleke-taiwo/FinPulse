@@ -14,14 +14,6 @@ interface Vendor {
   code: string;
 }
 
-const DEMO_VENDORS = [
-  "Acme Corp",
-  "Global Supplies Inc.",
-  "TechParts Ltd.",
-  "Office Depot",
-  "Cloud Services Co.",
-];
-
 const DEMO_DESCRIPTIONS = [
   "Server hosting - Q1 2026",
   "Office furniture delivery",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   LineChart,
@@ -21,7 +21,6 @@ interface CryptoData {
   latest: { symbol: string; price: number; change_24h: number; volume: number }[];
 }
 
-const SYMBOLS = ["BTC", "ETH", "SOL"];
 const SYMBOL_COLORS: Record<string, string> = {
   BTC: "var(--chart-4)",
   ETH: "var(--chart-1)",
@@ -34,16 +33,18 @@ export default function CryptoPage() {
   const [selectedSymbol, setSelectedSymbol] = useState("BTC");
   const [days, setDays] = useState(30);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    const res = await fetch(`/api/data-sources/crypto?symbol=${selectedSymbol}&days=${days}`);
-    if (res.ok) setData(await res.json());
-    setLoading(false);
-  }, [selectedSymbol, days]);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let active = true;
+    fetch(`/api/data-sources/crypto?symbol=${selectedSymbol}&days=${days}`)
+      .then(async (res) => {
+        if (!active) return;
+        if (res.ok) setData(await res.json());
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [selectedSymbol, days]);
 
   if (loading || !data) {
     return (

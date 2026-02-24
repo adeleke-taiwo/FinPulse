@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/db";
-import type { Prisma, JournalStatus, AccountClassification } from "@prisma/client";
+import type { AccountClassification } from "@prisma/client";
 
 interface JournalLineInput {
   glAccountId: string;

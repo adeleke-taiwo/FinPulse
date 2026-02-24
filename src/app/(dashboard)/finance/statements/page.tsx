@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { IncomeStatementView, BalanceSheetView } from "@/components/finance/financial-statement";
 import { formatCurrency } from "@/lib/utils";
 import type { IncomeStatement, BalanceSheet, CashFlowStatement } from "@/lib/finance/statements";
-import { FileText, Download } from "lucide-react";
+import { FileText } from "lucide-react";
 
 type StatementType = "income" | "balance" | "cashflow";
 
@@ -26,7 +26,7 @@ export default function FinancialStatementsPage() {
   const [incomeStatement, setIncomeStatement] = useState<IncomeStatement | null>(null);
   const [balanceSheet, setBalanceSheet] = useState<BalanceSheet | null>(null);
   const [cashFlow, setCashFlow] = useState<CashFlowStatement | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const fetchStatement = useCallback(async () => {
     setLoading(true);

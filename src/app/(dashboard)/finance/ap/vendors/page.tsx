@@ -12,7 +12,7 @@ import {
   Building2,
 } from "lucide-react";
 import Link from "next/link";
-import { toTitleCase } from "@/lib/utils";
+
 
 interface Vendor {
   id: string;

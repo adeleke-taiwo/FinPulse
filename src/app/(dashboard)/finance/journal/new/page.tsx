@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { JournalLineEditor } from "@/components/finance/journal-line-editor";
 import type { JournalLineInput } from "@/components/finance/journal-line-editor";
-import { ArrowLeft, Save, Send } from "lucide-react";
+import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
 
 interface GLAccountOption {

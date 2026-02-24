@@ -75,7 +75,7 @@ export default function MembersPage() {
   // Change role
   const [editingMemberId, setEditingMemberId] = useState<string | null>(null);
   const [editRole, setEditRole] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const fetchMembers = useCallback(async () => {
     setLoading(true);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -27,16 +27,18 @@ export default function GitHubPage() {
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    const res = await fetch(`/api/data-sources/github?days=${days}`);
-    if (res.ok) setData(await res.json());
-    setLoading(false);
-  }, [days]);
-
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    let active = true;
+    fetch(`/api/data-sources/github?days=${days}`)
+      .then(async (res) => {
+        if (!active) return;
+        if (res.ok) setData(await res.json());
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
+  }, [days]);
 
   if (loading || !data) {
     return (

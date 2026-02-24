@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AgingChart } from "@/components/finance/aging-chart";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatCurrency, toTitleCase } from "@/lib/utils";
@@ -47,7 +47,7 @@ const invoiceStatusColors: Record<string, string> = {
 export default function ARDashboardPage() {
   const [data, setData] = useState<ARDashboardData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadData() {

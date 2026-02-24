@@ -1,4 +1,4 @@
-import { PrismaClient, TransactionType, TransactionStatus } from "@prisma/client";
+import { Prisma, PrismaClient, TransactionType, TransactionStatus } from "@prisma/client";
 import { v4 as uuid } from "uuid";
 
 const prisma = new PrismaClient();
@@ -12,10 +12,6 @@ function randInt(min: number, max: number) {
 function pick<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-function formatDateKey(d: Date): number {
-  return d.getFullYear() * 10000 + (d.getMonth() + 1) * 100 + d.getDate();
-}
-
 async function main() {
   console.log("=== Generating recent data (Jan 1 – Feb 15, 2026) ===\n");
 
@@ -26,9 +22,6 @@ async function main() {
   const incomeCategories = categories.filter((c) => ["salary", "consulting-revenue", "investment-returns"].includes(c.slug));
   const expenseCategories = categories.filter((c) => !["salary", "consulting-revenue", "investment-returns"].includes(c.slug));
 
-  const checkingAccounts = accounts.filter((a) => a.type === "CHECKING");
-  const savingsAccounts = accounts.filter((a) => a.type === "SAVINGS");
-  const investmentAccounts = accounts.filter((a) => a.type === "INVESTMENT");
   const allAccounts = accounts;
 
   // ── 1. Generate Transactions (Jan 1 – Feb 15, 2026) ──
@@ -51,10 +44,10 @@ async function main() {
     categoryId: string;
     type: TransactionType;
     status: TransactionStatus;
-    amount: any;
+    amount: number;
     description: string;
     occurredAt: Date;
-    metadata: any;
+    metadata: Prisma.InputJsonObject;
   }[] = [];
 
   const current = new Date(startDate);

@@ -5,7 +5,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatCurrency, toTitleCase } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { Plus, ArrowLeft, X, Users } from "lucide-react";
 import Link from "next/link";
 

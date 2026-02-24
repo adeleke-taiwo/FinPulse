@@ -53,7 +53,7 @@ export default function JournalEntryDetailPage() {
   const [entry, setEntry] = useState<JournalEntryDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {

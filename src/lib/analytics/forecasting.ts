@@ -25,13 +25,12 @@ export function linearRegression(
   const n = data.length;
   if (n < 2) return { slope: 0, intercept: data[0] || 0, r2: 0 };
 
-  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+  let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
   for (let i = 0; i < n; i++) {
     sumX += i;
     sumY += data[i];
     sumXY += i * data[i];
     sumX2 += i * i;
-    sumY2 += data[i] * data[i];
   }
 
   const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);

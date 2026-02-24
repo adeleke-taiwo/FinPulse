@@ -75,7 +75,7 @@ export default function BudgetsPage() {
       const rawBudgets = budgetJson.data || budgetJson.budgets || budgetJson || [];
 
       // Build department member count map
-      let deptMemberMap: Record<string, number> = {};
+      const deptMemberMap: Record<string, number> = {};
       if (deptRes.ok) {
         const deptJson = await deptRes.json();
         const depts = deptJson.data || deptJson || [];

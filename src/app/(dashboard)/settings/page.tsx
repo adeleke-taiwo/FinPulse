@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useTheme } from "@/components/layout/theme-provider";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Sun, Moon, Monitor } from "lucide-react";
 
 export default function SettingsPage() {

@@ -49,7 +49,7 @@ export default function ExpensesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const fetchExpenses = useCallback(async () => {
     setLoading(true);

@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -26,11 +24,7 @@ const statusConfig: Record<
 };
 
 export default function SOXPage() {
-  const [controls, setControls] = useState<SOXControl[]>([]);
-
-  useEffect(() => {
-    setControls(getSOXControls());
-  }, []);
+  const controls = getSOXControls();
 
   // Group controls by category
   const grouped = controls.reduce<Record<string, SOXControl[]>>((acc, control) => {

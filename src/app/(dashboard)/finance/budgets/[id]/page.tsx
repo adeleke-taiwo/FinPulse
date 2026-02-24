@@ -3,13 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { BudgetTable } from "@/components/finance/budget-table";
 import { VarianceChart } from "@/components/finance/variance-chart";
-import { ArrowLeft, Calendar, Building2, DollarSign, TrendingUp } from "lucide-react";
+import { ArrowLeft, Calendar, DollarSign, TrendingUp } from "lucide-react";
 import { toTitleCase } from "@/lib/utils";
 
 interface BudgetLineItem {

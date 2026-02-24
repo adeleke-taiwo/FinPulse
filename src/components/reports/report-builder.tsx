@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { GripVertical, Plus, X, BarChart3, PieChart, LineChart, Table } from "lucide-react";
+import { GripVertical, X, BarChart3, PieChart, LineChart, Table } from "lucide-react";
 
 interface ReportBlock {
   id: string;

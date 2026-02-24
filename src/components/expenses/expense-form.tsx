@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Upload, AlertTriangle } from "lucide-react";
 
 interface ExpenseFormProps {
@@ -36,11 +36,7 @@ export function ExpenseForm({ departments, costCenters, onSubmit }: ExpenseFormP
   const [departmentId, setDepartmentId] = useState("");
   const [costCenterId, setCostCenterId] = useState("");
   const [receiptUrl, setReceiptUrl] = useState("");
-  const [occurredAt, setOccurredAt] = useState("");
-
-  useEffect(() => {
-    setOccurredAt(new Date().toISOString().slice(0, 10));
-  }, []);
+  const [occurredAt, setOccurredAt] = useState(() => new Date().toISOString().slice(0, 10));
 
   const filteredCostCenters = costCenters.filter((cc) => cc.departmentId === departmentId);
   const amountNum = parseFloat(amount) || 0;

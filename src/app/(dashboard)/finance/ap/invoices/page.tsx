@@ -44,7 +44,7 @@ export default function APInvoicesPage() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [statusTab, setStatusTab] = useState("All");
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);

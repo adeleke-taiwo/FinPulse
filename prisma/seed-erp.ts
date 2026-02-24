@@ -1,4 +1,4 @@
-import { Prisma, PrismaClient, OrgRole, AccountClassification, NormalBalance, JournalStatus, ExpenseStatus, InvoiceStatus, CustomerInvoiceStatus, BudgetStatus, WorkflowType, WorkflowStatus, WorkflowStepStatus } from "@prisma/client";
+import { Prisma, PrismaClient, OrgRole, AccountClassification, NormalBalance, ExpenseStatus, InvoiceStatus, CustomerInvoiceStatus, WorkflowType } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { v4 as uuid } from "uuid";
 
@@ -311,8 +311,8 @@ async function main() {
 
   for (const org of [ORG1_ID, ORG2_ID]) {
     for (let m = 0; m < 12; m++) {
-      const year = m < 10 ? 2025 : 2026;
-      const month = m < 10 ? m + 3 : m - 9; // FY starts April
+      const _year = m < 10 ? 2025 : 2026;
+      const _month = m < 10 ? m + 3 : m - 9; // FY starts April
       const actualMonth = (m + 3) % 12;
       const actualYear = m + 3 >= 12 ? 2026 : 2025;
       periods.push({
@@ -334,8 +334,8 @@ async function main() {
   const org1Accounts = glAccounts.filter((a) => a.organizationId === ORG1_ID && a.parentId !== null);
   const revenueAccounts = org1Accounts.filter((a) => a.classification === "REVENUE");
   const expenseAccounts = org1Accounts.filter((a) => a.classification === "EXPENSE");
-  const assetAccounts = org1Accounts.filter((a) => a.classification === "ASSET");
-  const liabilityAccounts = org1Accounts.filter((a) => a.classification === "LIABILITY");
+  const _assetAccounts = org1Accounts.filter((a) => a.classification === "ASSET");
+  const _liabilityAccounts = org1Accounts.filter((a) => a.classification === "LIABILITY");
 
   let jeCount = 0;
   // Generate journal entries from Jan 2025 through the current month
@@ -345,7 +345,7 @@ async function main() {
   const endYear = now.getFullYear();
   const endMonth = now.getMonth();
   const liabilityAccounts2 = org1Accounts.filter((a) => a.classification === "LIABILITY");
-  const equityAccounts = org1Accounts.filter((a) => a.classification === "EQUITY");
+  const _equityAccounts = org1Accounts.filter((a) => a.classification === "EQUITY");
 
   for (let y = startYear; y <= endYear; y++) {
     const mStart = y === startYear ? startMonth : 0;
@@ -556,7 +556,7 @@ async function main() {
   console.log(`  Created ${vendors.length} vendors`);
 
   // ── AP Invoices (200 across aging buckets) ──
-  const invoiceStatuses: InvoiceStatus[] = ["RECEIVED", "PENDING_APPROVAL", "APPROVED", "PARTIALLY_PAID", "PAID", "OVERDUE"];
+  const _invoiceStatuses: InvoiceStatus[] = ["RECEIVED", "PENDING_APPROVAL", "APPROVED", "PARTIALLY_PAID", "PAID", "OVERDUE"];
   const invoices: {
     id: string; organizationId: string; vendorId: string; invoiceNumber: string;
     amount: number; taxAmount: number; totalAmount: number; status: InvoiceStatus;
@@ -746,7 +746,7 @@ async function main() {
     receiptUrl: string | null; occurredAt: Date;
   }[] = [];
 
-  const engDept = departments.find((d) => d.name === "Engineering" && d.organizationId === ORG1_ID)!;
+  const _engDept = departments.find((d) => d.name === "Engineering" && d.organizationId === ORG1_ID)!;
 
   for (let i = 0; i < 100; i++) {
     const cat = pick(expenseCategories);

@@ -132,7 +132,7 @@ export default function DepartmentDetailPage() {
     );
   }
 
-  const variance = data.totalBudget - data.totalSpent;
+  const _variance = data.totalBudget - data.totalSpent;
 
   const stats = [
     { label: "Total Budget", value: formatCurrency(data.totalBudget), icon: DollarSign, color: "text-indigo-600" },

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { AccountTree } from "@/components/finance/account-tree";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import { BookOpen } from "lucide-react";
@@ -43,7 +43,7 @@ export default function ChartOfAccountsPage() {
   const [accounts, setAccounts] = useState<GLAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
   const router = useRouter();
 
   const fetchAccounts = useCallback(async () => {

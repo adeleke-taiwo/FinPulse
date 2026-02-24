@@ -40,6 +40,28 @@ const classColors: Record<string, string> = {
   EXPENSE: "text-orange-500",
 };
 
+type AccountNode = {
+  id: string;
+  code: string;
+  name: string;
+  classification: string;
+  normalBalance?: string;
+  description?: string;
+  balance?: number;
+  children?: AccountNode[];
+};
+
+function findAccount(accounts: AccountNode[], id: string): AccountNode | null {
+  for (const a of accounts) {
+    if (a.id === id) return a;
+    if (a.children) {
+      const found = findAccount(a.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+}
+
 export default function AccountLedgerPage() {
   const params = useParams();
   const accountId = params.accountId as string;
@@ -47,7 +69,7 @@ export default function AccountLedgerPage() {
   const [account, setAccount] = useState<GLAccountDetail | null>(null);
   const [lines, setLines] = useState<JournalEntryLine[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -89,46 +111,6 @@ export default function AccountLedgerPage() {
     }
     load();
   }, [accountId]);
-
-  function findAccount(
-    accounts: Array<{
-      id: string;
-      code: string;
-      name: string;
-      classification: string;
-      normalBalance?: string;
-      description?: string;
-      balance?: number;
-      children?: Array<{
-        id: string;
-        code: string;
-        name: string;
-        classification: string;
-        normalBalance?: string;
-        description?: string;
-        balance?: number;
-        children?: Array<{
-          id: string;
-          code: string;
-          name: string;
-          classification: string;
-          normalBalance?: string;
-          description?: string;
-          balance?: number;
-        }>;
-      }>;
-    }>,
-    id: string
-  ): (typeof accounts)[0] | null {
-    for (const a of accounts) {
-      if (a.id === id) return a;
-      if (a.children) {
-        const found = findAccount(a.children, id);
-        if (found) return found;
-      }
-    }
-    return null;
-  }
 
   // Compute running balance
   function getRunningBalances(entries: JournalEntryLine[]) {
