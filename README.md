@@ -23,12 +23,16 @@ Built to demonstrate the ability to architect production-grade fintech software:
 
 | | |
 |:---:|:---:|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![General Ledger](docs/screenshots/general-ledger.png) |
-| **Dashboard** — KPI cards, revenue trends, cash flow, recent transactions | **General Ledger** — Chart of accounts with drill-down into GL activity |
-| ![Analytics](docs/screenshots/analytics.png) | ![Transactions](docs/screenshots/transactions.png) |
-| **Revenue Analytics** — Trend analysis with daily/weekly/monthly granularity | **Transactions** — Real-time SSE feed, filtering, sorting, CSV export |
-| ![Risk](docs/screenshots/risk.png) | ![Expenses](docs/screenshots/expenses.png) |
-| **Risk Monitoring** — Severity distribution, monthly trend, anomaly detection | **Expense Management** — Multi-category tracking with approval workflows |
+| ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+| **Login** — Demo accounts with click-to-fill for all 6 roles | **Dashboard** — KPI cards, revenue trends, cash flow, recent transactions |
+| ![Executive](docs/screenshots/executive.png) | ![General Ledger](docs/screenshots/general-ledger.png) |
+| **Executive Dashboard** — Consolidated P&L, cash position, financial ratios | **General Ledger** — Chart of accounts with drill-down into GL activity |
+| ![Journal](docs/screenshots/journal.png) | ![Analytics](docs/screenshots/analytics.png) |
+| **Journal Entries** — Double-entry ledger with approval workflow statuses | **Revenue Analytics** — Trend analysis with daily/weekly/monthly granularity |
+| ![Transactions](docs/screenshots/transactions.png) | ![Risk](docs/screenshots/risk.png) |
+| **Transactions** — Real-time SSE feed, filtering, sorting, CSV export | **Risk Monitoring** — Severity distribution, monthly trend, anomaly detection |
+| ![Expenses](docs/screenshots/expenses.png) | |
+| **Expense Management** — Multi-category tracking with department & cost center | |
 
 ---
 
