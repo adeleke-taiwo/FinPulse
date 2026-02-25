@@ -16,44 +16,49 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        try {
+          if (!credentials?.email || !credentials?.password) return null;
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email as string },
-          include: {
-            orgMemberships: {
-              include: {
-                organization: { select: { id: true, name: true } },
-                customRole: { select: { permissions: true } },
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email as string },
+            include: {
+              orgMemberships: {
+                include: {
+                  organization: { select: { id: true, name: true } },
+                  customRole: { select: { permissions: true } },
+                },
+                take: 1,
               },
-              take: 1,
             },
-          },
-        });
+          });
 
-        if (!user || !user.isActive) return null;
+          if (!user || !user.isActive) return null;
 
-        const isValid = await compare(
-          credentials.password as string,
-          user.passwordHash
-        );
+          const isValid = await compare(
+            credentials.password as string,
+            user.passwordHash
+          );
 
-        if (!isValid) return null;
+          if (!isValid) return null;
 
-        // Get primary org membership if exists
-        const membership = user.orgMemberships[0];
+          // Get primary org membership if exists
+          const membership = user.orgMemberships[0];
 
-        return {
-          id: user.id,
-          email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
-          role: user.role,
-          organizationId: membership?.organization?.id || null,
-          organizationName: membership?.organization?.name || null,
-          orgRole: membership?.role || null,
-          departmentId: membership?.departmentId || null,
-          customPermissions: (membership?.customRole?.permissions as Record<string, string[]>) || null,
-        };
+          return {
+            id: user.id,
+            email: user.email,
+            name: `${user.firstName} ${user.lastName}`,
+            role: user.role,
+            organizationId: membership?.organization?.id || null,
+            organizationName: membership?.organization?.name || null,
+            orgRole: membership?.role || null,
+            departmentId: membership?.departmentId || null,
+            customPermissions: (membership?.customRole?.permissions as Record<string, string[]>) || null,
+          };
+        } catch (error) {
+          console.error("[AUTH] Login error:", error);
+          return null;
+        }
       },
     }),
   ],
